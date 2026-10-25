@@ -8,6 +8,8 @@ use App\Http\Controllers\TeacherQuizController;
 use App\Http\Controllers\TeacherQuestionController;
 use App\Http\Controllers\QuizController;
 use App\Http\Controllers\MaterialCompletionController;
+use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\AchievementController;
 
 Route::view('/', 'home')->name('home');
 
@@ -26,10 +28,14 @@ Route::middleware('guest')->group(function () {
 });
 
 Route::middleware('auth')->group(function () {
-    Route::view('/dashboard', 'dashboard')->name('dashboard');
+    Route::get('/dashboard', [DashboardController::class, 'index'])
+        ->name('dashboard');
 
     Route::post('/logout', [AuthController::class, 'logout'])
         ->name('logout');
+
+    Route::get('/achievements', [AchievementController::class, 'index'])
+        ->name('achievements.index');
 });
 
 Route::get('/materi', [MaterialController::class, 'index'])
@@ -118,7 +124,6 @@ Route::middleware(['auth', 'role:teacher,admin'])
                 Route::delete('/{question}', [TeacherQuestionController::class, 'destroy'])
                     ->name('destroy');
             });
-
     });
 
 

@@ -197,9 +197,10 @@
 
         .progress-fill {
             height: 100%;
-            width: 70%;
+            width: 0;
             background: var(--primary);
             border-radius: 20px;
+            transition: width 0.3s ease;
         }
 
         .mini-stats {
@@ -404,6 +405,21 @@
                 letter-spacing: -1px;
             }
         }
+
+        .progress-track {
+            width: 100%;
+            height: 8px;
+            overflow: hidden;
+            border-radius: 999px;
+            background: #e5e7eb;
+        }
+
+        .progress-fill {
+            height: 100%;
+            border-radius: 999px;
+            background: #6366f1;
+            transition: width 0.3s ease;
+        }
     </style>
 </head>
 
@@ -456,37 +472,95 @@
                     </p>
                 </div>
 
+
                 <div class="learning-card">
                     <h3>🚀 Perjalanan Belajarmu</h3>
                     <p class="card-description">
                         Setiap langkah kecil membawamu lebih dekat ke tujuan.
                     </p>
 
+                    @auth
+                    @php
+                    $homeXp = (int) auth()->user()->xp;
+                    $homeMaterialsCompleted = auth()->user()
+                    ->materialCompletions()
+                    ->count();
+
+                    $dailyGoal = 3;
+
+                    $todayQuizzes = auth()->user()
+                    ->quizAttempts()
+                    ->whereNotNull('completed_at')
+                    ->whereDate('completed_at', today())
+                    ->distinct('quiz_id')
+                    ->count('quiz_id');
+
+                    $dailyProgress = min(
+                    100,
+                    (int) round(($todayQuizzes / $dailyGoal) * 100)
+                    );
+                    @endphp
+
                     <div class="progress-box">
                         <div class="progress-header">
                             <span>Target belajar harian</span>
-                            <span>70%</span>
+                            <span>{{ $dailyProgress }}%</span>
                         </div>
+
+                        <div class="progress-track"
+                            role="progressbar"
+                            aria-label="Progres target belajar harian"
+                            aria-valuemin="0"
+                            aria-valuemax="100"
+                            aria-valuenow="{{ $dailyProgress }}">
+                            <div class="progress-fill"
+                                @style(['width'=> $dailyProgress . '%'])></div>
+                        </div>
+
+                        <p class="card-description" style="margin: 10px 0 0;">
+                            {{ $todayQuizzes }} dari {{ $dailyGoal }} kuis selesai hari ini.
+                        </p>
+                    </div>
+
+                    <div class="mini-stats">
+                        <div class="mini-stat">
+                            <strong>📖 {{ $homeMaterialsCompleted }}</strong>
+                            <span>Materi selesai</span>
+                        </div>
+
+                        <div class="mini-stat">
+                            <strong>⭐ {{ number_format($homeXp) }}</strong>
+                            <span>Total XP</span>
+                        </div>
+                    </div>
+                    @else
+                    <div class="progress-box">
+                        <div class="progress-header">
+                            <span>Perjalanan belajarmu dimulai di sini</span>
+                            <span>0%</span>
+                        </div>
+
                         <div class="progress-track">
-                            <div class="progress-fill"></div>
+                            <div class="progress-fill" style="width: 0%"></div>
                         </div>
                     </div>
 
                     <div class="mini-stats">
                         <div class="mini-stat">
-                            <strong>📖 3</strong>
-                            <span>Contoh materi</span>
+                            <strong>📖 Materi</strong>
+                            <span>Tandai materi yang selesai</span>
                         </div>
+
                         <div class="mini-stat">
-                            <strong>⭐ 100</strong>
-                            <span>Contoh poin</span>
+                            <strong>⭐ XP</strong>
+                            <span>Kumpulkan poin dari kuis</span>
                         </div>
                     </div>
 
                     <p class="card-description" style="margin: 18px 0 0;">
-                        *Ilustrasi tampilan. Progres dan poin akan aktif setelah
-                        fitur akun dan kuis dibuat.
+                        Masuk atau daftar untuk mulai mencatat perjalanan belajarmu.
                     </p>
+                    @endauth
                 </div>
             </div>
         </section>

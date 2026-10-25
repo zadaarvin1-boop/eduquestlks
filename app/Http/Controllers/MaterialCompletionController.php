@@ -6,6 +6,7 @@ use App\Models\Material;
 use App\Models\MaterialCompletion;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
+use App\Services\BadgeAwardService;
 
 class MaterialCompletionController extends Controller
 {
@@ -22,6 +23,9 @@ class MaterialCompletionController extends Controller
                 'completed_at' => now(),
             ]
         );
+
+        // Periksa dan berikan lencana setelah progres tersimpan.
+        app(BadgeAwardService::class)->check(Auth::user());
 
         return redirect()
             ->route('materials.show', $material->slug)

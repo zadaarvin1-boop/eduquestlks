@@ -12,6 +12,7 @@ use Illuminate\View\View;
 use Illuminate\Http\RedirectResponse;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
+use App\Services\BadgeAwardService;
 
 class QuizController extends Controller
 {
@@ -86,7 +87,7 @@ class QuizController extends Controller
         $remainingSeconds = max(
             0,
             ($quiz->duration_minutes * 60)
-            - (now()->timestamp - $startedAt)
+                - (now()->timestamp - $startedAt)
         );
 
         return view('quizzes.show', compact(
@@ -184,6 +185,10 @@ class QuizController extends Controller
             ];
         });
 
+        if ($request->user()?->role === 'student') {
+            app(BadgeAwardService::class)->check($request->user());
+        }
+
         $request->session()->forget($sessionKey);
 
         return redirect()
@@ -203,7 +208,7 @@ class QuizController extends Controller
                 'first_student_attempt' => $submission['first_student_attempt'],
             ]);
     }
-    
+
     public function result(Request $request, string $slug): View|RedirectResponse
     {
         $result = $request->session()->get('quiz_result');
